@@ -329,10 +329,16 @@ class Power(Calculation):
             raise ValueError("Inputs must be a list of numbers.")
         if len(self.inputs) < 2:
             raise ValueError("Power operation requires at least two numbers.")
-        result = self.inputs[0]
-        for exponent in self.inputs[1:]:
-            result = result ** exponent
-        return result
+        # Right-associative: a ** b ** c == a ** (b ** c)
+        base = self.inputs[0]
+        exponents = self.inputs[1:]
+        if len(exponents) == 1:
+            return base ** exponents[0]
+        # Compute exponent chain from right to left
+        exp = exponents[-1]
+        for e in reversed(exponents[:-1]):
+            exp = e ** exp
+        return base ** exp
 
 class Root(Calculation):
     """
