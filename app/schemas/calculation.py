@@ -39,7 +39,7 @@ class CalculationBase(BaseModel):
     )
     inputs: List[float] = Field(
         ...,
-        description="List of numeric inputs for the calculation. For power/root, provide [base, exponent/degree]",
+        description="List of numeric inputs for the calculation. For power/root, provide [base1, base2, ..., exponent/degree]",
         example=[10.5, 3, 2],
         min_items=2
     )
@@ -118,12 +118,12 @@ class CalculationBase(BaseModel):
             if any(x == 0 for x in self.inputs[1:]):
                 raise ValueError("Cannot divide by zero") #pragma: no cover
         if self.type == CalculationType.POWER:
-            if len(self.inputs) != 2:
-                raise ValueError("Power operation requires exactly two numbers: base and exponent.")
+            if len(self.inputs) < 2:
+                raise ValueError("Power operation requires at least two numbers.")
         if self.type == CalculationType.ROOT:
-            if len(self.inputs) != 2:
-                raise ValueError("Root operation requires exactly two numbers: base and degree.")
-            if self.inputs[1] == 0:
+            if len(self.inputs) < 2:
+                raise ValueError("Root operation requires at least two numbers.")
+            if any(degree == 0 for degree in self.inputs[1:]):
                 raise ValueError("Root degree cannot be zero.")
         return self
     
@@ -180,18 +180,19 @@ class CalculationUpdate(BaseModel):
     )
 
     @model_validator(mode='after')
-    def validate_inputs(self) -> "CalculationUpdate":
+    def validate_inputs(self) -> "CalculationBase":
         """
-        Validates that if inputs are provided, at least two numbers are present.
-
-        Returns:
-            CalculationUpdate: The validated model instance
-
-        Raises:
-            ValueError: If less than two numbers are provided
+        Validates the inputs based on calculation type.
+        ...existing code...
         """
-        if self.inputs is not None and len(self.inputs) < 2:
-            raise ValueError("At least two numbers are required for calculation") #pragma: no cover
+        if self.type == CalculationType.POWER:
+            if len(self.inputs) < 2:
+                raise ValueError("Power operation requires at least two numbers.")
+        if self.type == CalculationType.ROOT:
+            if len(self.inputs) < 2:
+                raise ValueError("Root operation requires at least two numbers: one or more bases and one degree.")
+            if self.inputs[-1] == 0:
+                raise ValueError("Root degree cannot be zero.")
         return self
 
     model_config = ConfigDict(
@@ -224,10 +225,10 @@ class CalculationResponse(CalculationBase):
         ..., 
         description="Time when the calculation was last updated"
     )
-    result: float = Field(
+    result: float | list[float] = Field(
         ...,
-        description="Result of the calculation",
-        example=15.5
+        description="Result of the calculation (single value or list for power/root)",
+        example=[8, 9]
     )
 
     model_config = ConfigDict(
@@ -247,14 +248,5 @@ class CalculationResponse(CalculationBase):
             }
         }
     )
-
-
-
-
-
-    
-
-
-
 
 
