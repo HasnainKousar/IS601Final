@@ -1,5 +1,5 @@
 import pytest
-from app.operations import add, subtract, multiply, divide
+from app.operations import add, subtract, multiply, divide, power, root
 
 # Addition tests
 def test_add_integers():
@@ -33,3 +33,22 @@ def test_divide_floats():
 def test_divide_by_zero():
     with pytest.raises(ValueError, match="Cannot divide by zero."):
         divide(5, 0)
+
+# Power Test
+def test_power_integers():
+    assert power(2, 3) == 8
+
+def test_power_floats():
+    assert power(2.5, 2) == 6.25
+
+# Root Test
+def test_root_integers():
+    assert root(9, 2) == 3
+
+def test_root_floats():
+    assert root(16.0, 4) == 2.0
+# Negative root test
+def test_root_negative():
+    with pytest.raises(ValueError, match="Root degree cannot be zero."):
+        root(16.0, 0)
+
