@@ -275,7 +275,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!inputs || inputs.length < 2) {
       return null;
     }
-    
     let result;
     switch (type) {
       case 'addition':
@@ -288,22 +287,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         result = inputs.reduce((a, b) => a * b, 1);
         break;
       case 'division':
-        // Avoid division by zero
         if (inputs.some((value, index) => index > 0 && value === 0)) {
           return 'Cannot divide by zero';
         }
         result = inputs.reduce((a, b, i) => i === 0 ? a : a / b, inputs[0]);
         break;
+      case 'power':
+        result = inputs.slice(1).reduce((a, b) => Math.pow(a, b), inputs[0]);
+        break;
+      case 'root':
+        result = inputs.slice(1).reduce((a, b) => b === 0 ? NaN : Math.pow(a, 1 / b), inputs[0]);
+        break;
       default:
         return 'Unknown operation';
     }
-    
-    // Format the result nicely
-    return typeof result === 'number' ? 
-      (Math.abs(result) < 0.0001 && result !== 0) ? 
-        result.toExponential(4) : 
-        Math.round(result * 10000) / 10000 : 
-      result;
+    return typeof result === 'number' && !isNaN(result)
+      ? (Math.abs(result) < 0.0001 && result !== 0)
+        ? result.toExponential(4)
+        : Math.round(result * 10000) / 10000
+      : result;
   }
   
   // Function to update the preview
