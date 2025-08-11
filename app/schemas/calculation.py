@@ -180,19 +180,16 @@ class CalculationUpdate(BaseModel):
     )
 
     @model_validator(mode='after')
-    def validate_inputs(self) -> "CalculationBase":
+    def validate_inputs(self) -> "CalculationUpdate":
         """
-        Validates the inputs based on calculation type.
-        ...existing code...
+        Validates the inputs for update. Only checks that if provided, there are at least two numbers.
+        Type-specific validation is handled in the update endpoint using the existing calculation type.
         """
-        if self.type == CalculationType.POWER:
+        if self.inputs is not None:
+            if not isinstance(self.inputs, list):
+                raise ValueError("Inputs should be a valid list.")
             if len(self.inputs) < 2:
-                raise ValueError("Power operation requires at least two numbers.")
-        if self.type == CalculationType.ROOT:
-            if len(self.inputs) < 2:
-                raise ValueError("Root operation requires at least two numbers: one or more bases and one degree.")
-            if self.inputs[-1] == 0:
-                raise ValueError("Root degree cannot be zero.")
+                raise ValueError("At least two numbers are required for calculation update.")
         return self
 
     model_config = ConfigDict(
