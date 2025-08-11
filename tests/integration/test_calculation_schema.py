@@ -1,5 +1,9 @@
 import pytest
 import uuid
+from app.schemas.calculation import CalculationBase, CalculationResponse
+from uuid import uuid4
+from datetime import datetime
+
 
 from app.models.calculation import (
     Calculation,
@@ -169,3 +173,29 @@ def test_abstractcalculation_repr():
     dummy = Dummy()
     assert repr(dummy) == "<Calculation(type=multiplication, inputs=[7, 8, 9])>"
 
+
+def test_calculationbase_division_by_zero():
+    """Covers division by zero validation (line 118)."""
+    data = {"type": "division", "inputs": [10, 0]}
+    with pytest.raises(ValueError, match="Cannot divide by zero"):
+        CalculationBase(**data)
+
+def test_calculationresponse_fields_and_config():
+    """Covers CalculationResponse field validation and model config (lines 190, 192)."""
+    data = {
+        "id": uuid4(),
+        "user_id": uuid4(),
+        "type": "addition",
+        "inputs": [1, 2],
+        "result": 3,
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow(),
+    }
+    resp = CalculationResponse(**data)
+    assert resp.id is not None
+    assert resp.user_id is not None
+    assert resp.type == "addition"
+    assert resp.inputs == [1, 2]
+    assert resp.result == 3
+    assert resp.created_at is not None
+    assert resp.updated_at is not None
