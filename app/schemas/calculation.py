@@ -21,6 +21,8 @@ class CalculationType(str, Enum):
     SUBTRACTION = "subtraction"
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
+    POWER = "power"
+    ROOT = "root"
 
 
 class CalculationBase(BaseModel):
@@ -32,14 +34,14 @@ class CalculationBase(BaseModel):
     """
     type: CalculationType = Field(
         ...,  # The ... means this field is required
-        description="Type of calculation (addition, subtraction, multiplication, division)",
+        description="Type of calculation (addition, subtraction, multiplication, division, power, root)",
         example="addition"
     )
     inputs: List[float] = Field(
-        ...,  # The ... means this field is required
-        description="List of numeric inputs for the calculation",
+        ...,
+        description="List of numeric inputs for the calculation. For power/root, provide [base, exponent/degree]",
         example=[10.5, 3, 2],
-        min_items=2  # Ensures at least 2 numbers are provided
+        min_items=2
     )
 
     @field_validator("type", mode='before')
@@ -115,6 +117,14 @@ class CalculationBase(BaseModel):
             # Prevent division by zero (skip the first value as numerator)
             if any(x == 0 for x in self.inputs[1:]):
                 raise ValueError("Cannot divide by zero") #pragma: no cover
+        if self.type == CalculationType.POWER:
+            if len(self.inputs) != 2:
+                raise ValueError("Power operation requires exactly two numbers: base and exponent.")
+        if self.type == CalculationType.ROOT:
+            if len(self.inputs) != 2:
+                raise ValueError("Root operation requires exactly two numbers: base and degree.")
+            if self.inputs[1] == 0:
+                raise ValueError("Root degree cannot be zero.")
         return self
     
     model_config = ConfigDict(
@@ -125,7 +135,9 @@ class CalculationBase(BaseModel):
         json_schema_extra={
             "examples": [
                 {"type": "addition", "inputs": [10.5, 3, 2]},
-                {"type": "division", "inputs": [100, 2]}
+                {"type": "division", "inputs": [100, 2]},
+                {"type": "power", "inputs": [2, 3]},
+                {"type": "root", "inputs": [9, 2]}
             ]
         }
     )
