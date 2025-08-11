@@ -324,13 +324,15 @@ class Power(Calculation):
     """
     __mapper_args__ = {"polymorphic_identity": "power"}
 
-    def get_result(self) -> float:
+    def get_result(self):
         if not isinstance(self.inputs, list):
             raise ValueError("Inputs must be a list of numbers.")
-        if len(self.inputs) != 2:
-            raise ValueError("Power operation requires exactly two numbers: base and exponent.")
-        base, exponent = self.inputs
-        return base ** exponent
+        if len(self.inputs) < 2:
+            raise ValueError("Power operation requires at least two numbers.")
+        result = self.inputs[0]
+        for exponent in self.inputs[1:]:
+            result = result ** exponent
+        return result
 
 class Root(Calculation):
     """
@@ -342,14 +344,16 @@ class Root(Calculation):
     """
     __mapper_args__ = {"polymorphic_identity": "root"}
 
-    def get_result(self) -> float:
+    def get_result(self):
         if not isinstance(self.inputs, list):
             raise ValueError("Inputs must be a list of numbers.")
-        if len(self.inputs) != 2:
-            raise ValueError("Root operation requires exactly two numbers: base and degree.")
-        base, degree = self.inputs
-        if degree == 0:
-            raise ValueError("Root degree cannot be zero.")
-        return base ** (1 / degree)
+        if len(self.inputs) < 2:
+            raise ValueError("Root operation requires at least two numbers.")
+        result = self.inputs[0]
+        for degree in self.inputs[1:]:
+            if degree == 0:
+                raise ValueError("Root degree cannot be zero.")
+            result = result ** (1 / degree)
+        return result
     
 
