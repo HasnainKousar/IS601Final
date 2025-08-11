@@ -7,6 +7,7 @@ from app.schemas.calculation import (
     CalculationUpdate,
     CalculationResponse
 )
+from app.models.calculation import Power, Root
 
 def test_create_calculation_valid():
     """Test creating a valid CalculationCreate schema."""
@@ -97,3 +98,48 @@ def test_response_calculation_valid():
     assert calc_response.type == "multiplication"
     assert calc_response.inputs == [6, 7]
     assert calc_response.result == 42.0
+
+# Power tests
+
+def test_power_get_result_chained():
+    """Test Power.get_result with chained exponents."""
+    values = [2, 3, 2]  # 2 ** 3 ** 2 = 2 ** 9 = 512
+    power = Power(user_id=uuid4(), inputs=values)
+    assert power.get_result() == 512
+
+def test_power_invalid_inputs():
+    """Test Power.get_result raises ValueError for invalid inputs."""
+    power = Power(user_id=uuid4(), inputs=[5])
+    with pytest.raises(ValueError, match="Power operation requires at least two numbers."):
+        power.get_result()
+
+def test_power_two_inputs():
+    """Test Power.get_result with exactly two inputs."""
+    power = Power(user_id=uuid4(), inputs=[2, 3])
+    assert power.get_result() == 8
+
+def test_power_three_inputs():
+    """Test Power.get_result with three inputs ."""
+    power = Power(user_id=uuid4(), inputs=[2, 3, 2])
+    assert power.get_result() == 512
+
+# Root tests
+
+def test_root_get_result_chained():
+    """Test Root.get_result with chained roots."""
+    values = [16, 2, 2]  # sqrt(sqrt(16)) = sqrt(4) = 2
+    root = Root(user_id=uuid4(), inputs=values)
+    assert root.get_result() == 2
+
+def test_root_invalid_inputs():
+    """Test Root.get_result raises ValueError for invalid inputs."""
+    root = Root(user_id=uuid4(), inputs=[9])
+    with pytest.raises(ValueError, match="Root operation requires at least two numbers."):
+        root.get_result()
+
+def test_root_degree_zero():
+    """Test Root.get_result raises ValueError when root degree is zero."""
+    root = Root(user_id=uuid4(), inputs=[9, 0])
+    with pytest.raises(ValueError, match="Root degree cannot be zero."):
+        root.get_result()
+
