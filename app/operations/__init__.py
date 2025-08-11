@@ -114,3 +114,46 @@ def divide(a: Number, b: Number) -> Number:
     result = a / b
     return result
 
+def power(a: Number, b: Number) -> Number:
+    """Raise a to the power of b and return the result.
+    
+    Parameters:
+    - a (Number): The base number.
+    - b (Number): The exponent.
+    
+    Returns:
+    - Number: The result of a raised to the power of b.
+    
+    Example:
+    >>> power(2, 3)
+    8
+    >>> power(9, 0.5)
+    3.0
+    """
+    return a ** b
+
+def root(a: Number, b: Number) -> Number:
+    """Return the b-th root of a (i.e., a ** (1/b)).
+    
+    Parameters:
+    - a (Number): The base number.
+    - b (Number): The degree of the root.
+    
+    Returns:
+    - Number: The b-th root of a.
+    
+    Raises:
+    - ValueError: If b is zero.
+    
+    Example:
+    >>> root(9, 2)
+    3.0
+    >>> root(27, 3)
+    3.0
+    >>> root(16, 0)  # Raises ValueError
+    ValueError: Root degree cannot be zero.
+    """
+    if b == 0:
+        raise ValueError("Root degree cannot be zero.")
+    return a ** (1 / b)
+
