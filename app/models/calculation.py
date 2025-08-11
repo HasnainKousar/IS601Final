@@ -140,7 +140,9 @@ class AbstractCalculation:
             'subtraction': Subtraction,
             'multiplication': Multiplication,
             'division': Division,
-        }
+            'power': Power,
+            'root': Root,
+            }
         calculation_class = calculation_classes.get(calculation_type.lower())
         if not calculation_class:
             raise ValueError(f"Unsupported calculation type: {calculation_type}")
@@ -312,3 +314,42 @@ class Division(Calculation):
             result /= value
         return result
     
+class Power(Calculation):
+    """
+    Power calculation subclass.
+    Computes base ** exponent.
+    Examples:
+        [2, 3] -> 2 ** 3 = 8
+        [5, 2] -> 5 ** 2 = 25
+    """
+    __mapper_args__ = {"polymorphic_identity": "power"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Power operation requires exactly two numbers: base and exponent.")
+        base, exponent = self.inputs
+        return base ** exponent
+
+class Root(Calculation):
+    """
+    Root calculation subclass.
+    Computes base ** (1 / degree).
+    Examples:
+        [9, 2] -> 9 ** (1/2) = 3 (square root)
+        [27, 3] -> 27 ** (1/3) = 3 (cube root)
+    """
+    __mapper_args__ = {"polymorphic_identity": "root"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) != 2:
+            raise ValueError("Root operation requires exactly two numbers: base and degree.")
+        base, degree = self.inputs
+        if degree == 0:
+            raise ValueError("Root degree cannot be zero.")
+        return base ** (1 / degree)
+    
+
