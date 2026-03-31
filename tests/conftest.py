@@ -154,8 +154,7 @@ def test_user(db_session: Session) -> User:
     Create and return a single test user in the database.
     """
     user_data = create_fake_user()
-    user = User(**user_data)
-    db_session.add(user)
+    user = User.register(db_session, user_data)
     db_session.commit()
     db_session.refresh(user)
     logger.info(f"Created test user ID: {user.id}")
@@ -168,8 +167,7 @@ def seed_users(db_session: Session, request) -> List[User]:
     Number of users can be set via request.param (default 5).
     """
     num_users = getattr(request, "param", 5)
-    users = [User(**create_fake_user()) for _ in range(num_users)]
-    db_session.add_all(users)
+    users = [User.register(db_session, create_fake_user()) for _ in range(num_users)]
     db_session.commit()
     logger.info(f"Seeded {len(users)} users.")
     return users

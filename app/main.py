@@ -28,7 +28,10 @@ from app.models.user import User  # Database model for users
 from app.schemas.calculation import CalculationBase, CalculationResponse, CalculationUpdate  # API request/response schemas
 from app.schemas.token import TokenResponse  # API token schema
 from app.schemas.user import UserCreate, UserResponse, UserLogin  # User schemas
+from app.core.config import get_settings
 from app.database import Base, get_db, engine  # Database connection
+
+settings = get_settings()
 
 
 # Create table on startup using lifespan event
@@ -160,10 +163,10 @@ def login_json(user_login: UserLogin, db: Session = Depends(get_db)):
 
     # Ensure expires_at is timezone-aware
     expires_at = auth_result.get("expires_at")
-    if expires_at and expires_at.tzinfo is None:
+    if expires_at is None:
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    elif expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
-    else:
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
 
     return TokenResponse(
         access_token=auth_result["access_token"],
